@@ -9,28 +9,35 @@ This RESTful API allows users to upload CSV files, retrieve statistical data (me
 - **Upload CSV Files**: Accepts CSV files and stores the data in memory.
 - **Retrieve Statistics**: Automatically detects numeric columns and calculates mean and median.
 - **Query Data**: Filters rows based on query parameters.
+- **Retrieve CSV File Data**: Returns the contents of `employees.csv`.
 - **API Key Authentication**: Secured endpoints using an API key.
 
-## Requirements
+## Environment Setup
 
-Ensure you have Python installed. Install dependencies using:
-
-```sh
-pip install -r requirements.txt
-```
-
-### `requirements.txt`
-
-```txt
-Flask
-python-dotenv
-```
+1. Install **Python 3.11+**
+2. Create a virtual environment:
+   ```sh
+   python -m venv venv
+   ```
+3. Activate the virtual environment:
+   - **Windows**:
+     ```sh
+     venv\Scripts\activate
+     ```
+   - **Mac/Linux**:
+     ```sh
+     source venv/bin/activate
+     ```
+4. Install dependencies:
+   ```sh
+   pip install -r requirements.txt
+   ```
 
 ## Setting Up the API
 
 1. Clone this repository:
    ```sh
-   https://github.com/adarshmadhusoodanan/RESTful-API.git
+   git clone https://github.com/adarshmadhusoodanan/RESTful-API.git
    cd RESTful-API
    ```
 2. Create a `.env` file and add your API key:
