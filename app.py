@@ -85,21 +85,49 @@ def get_stats():
     if not data_storage:
         return jsonify({"message": "No data available"}), 400
 
-    # Calculate statistics based on the SALARY column
-    try:
-        salaries = [float(row['SALARY']) for row in data_storage if 'SALARY' in row and row['SALARY'].strip()]
-    except Exception as e:
-        return jsonify({"message": "Data error", "error": str(e)}), 400
+    numeric_columns = {}
 
-    if not salaries:
-        return jsonify({"message": "No numeric data found in 'SALARY' column"}), 400
+    # Identify numerical columns dynamically
+    for row in data_storage:
+        for key, value in row.items():
+            try:
+                num_value = float(value)
+                if key not in numeric_columns:
+                    numeric_columns[key] = []
+                numeric_columns[key].append(num_value)
+            except ValueError:
+                continue  # Ignore non-numeric values
 
-    stats = {
-        "mean_salary": statistics.mean(salaries),
-        "median_salary": statistics.median(salaries)
-    }
-    print(stats)
+    if not numeric_columns:
+        return jsonify({"message": "No numeric data found in the dataset"}), 400
+
+    # Calculate statistics for each numerical column
+    stats = {col: {"mean": statistics.mean(values), "median": statistics.median(values)}
+             for col, values in numeric_columns.items()}
+
     return jsonify(stats), 200
+
+
+
+# def get_stats():
+#     if not data_storage:
+#         return jsonify({"message": "No data available"}), 400
+
+#     # Calculate statistics based on the SALARY column
+#     # try:
+#     #     salaries = [float(row['SALARY']) for row in data_storage if 'SALARY' in row and row['SALARY'].strip()]
+#     # except Exception as e:
+#     #     return jsonify({"message": "Data error", "error": str(e)}), 400
+
+#     # if not salaries:
+#     #     return jsonify({"message": "No numeric data found in 'SALARY' column"}), 400
+
+#     # stats = {
+#     #     "mean_salary": statistics.mean(salaries),
+#     #     "median_salary": statistics.median(salaries)
+#     # }
+#     print(stats)
+#     return jsonify(stats), 200
 
 #Add a third endpoint to allow users to query the data (e.g., filter by a specific column value).
 @app.route('/query', methods=['GET'])
