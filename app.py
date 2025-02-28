@@ -18,7 +18,10 @@ data_storage = []  # In-memory storage for CSV data rows
 
 
 
-# @app.route('/', methods=['GET'])
+@app.route('/', methods=['GET'])
+def home():
+    return "<h1>Welcome to the CSV Uploader API</h1>"
+
 # def upload():
 #     with open('employees.csv', 'r') as f:
 #         reader = csv.reader(f)
@@ -105,6 +108,7 @@ def get_stats():
     stats = {col: {"mean": statistics.mean(values), "median": statistics.median(values)}
              for col, values in numeric_columns.items()}
 
+    print(stats)
     return jsonify(stats), 200
 
 
@@ -128,6 +132,7 @@ def get_stats():
 #     # }
 #     print(stats)
 #     return jsonify(stats), 200
+
 
 #Add a third endpoint to allow users to query the data (e.g., filter by a specific column value).
 @app.route('/query', methods=['GET'])
