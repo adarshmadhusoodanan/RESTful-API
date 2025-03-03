@@ -171,7 +171,7 @@ def query_data():
             "messages": [
                 {
                     "role": "user",
-                    "content": f"As an expert in data analysis, I have the data {data_storage}. Analyze the data and give a response based on the user query: {text}"
+                    "content": f"You are an expert data analyst. Given the dataset: {data_storage}, perform a thorough analysis to extract key insights, trends, patterns, and anomalies. Based on the user’s query: {text}, generate a precise, well-structured, and insightful response. Ensure the analysis is data-driven, using relevant statistical methods, visualizations, and logical reasoning where necessary. If assumptions are required, state them clearly. Keep the explanation concise yet comprehensive, making it easy to understand and actionable."
                 }
             ],
         })
