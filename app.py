@@ -9,6 +9,10 @@ import statistics
 from functools import wraps
 from dotenv import load_dotenv
 
+# Import requests and json modules
+import requests
+import json
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -34,11 +38,16 @@ if not API_KEY:
     raise ValueError("No API_KEY set for Flask application. Please set it in the .env file.")
 # print(f"API Key: {API_KEY   }")
 
+#  Retrieve the Deepseek API key from the environment variable
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY")
+if not DEEPSEEK_API_KEY:
+    raise ValueError("No DEEPSEEK_API_KEY set for Flask application. Please set it in the .env file.")
+
 
 #Implement basic authentication (e.g., a simple API key) to secure the endpoints.
 #authentication
-def authentication(f):
-    @wraps(f)
+def authentication(f): 
+    @wraps(f) 
     def decorated(*args, **kwargs):             #decorator function used to check the api key
         provided_key = request.headers.get("x-api-key")
         # print(f"Incoming Headers: {request.headers}") 
@@ -46,7 +55,7 @@ def authentication(f):
             # print(f"Unauthorized access with API key: {provided_key}")
             return jsonify({"message": "Unauthorized"}), 401
         return f(*args, **kwargs)
-    return decorated
+    return decorated 
 
 # print(f"Loaded API Key from .env: {API_KEY}")  
 
@@ -107,6 +116,7 @@ def get_stats():
     # Calculate statistics for each numerical column
     stats = {col: {"mean": statistics.mean(values), "median": statistics.median(values)}
              for col, values in numeric_columns.items()}
+    
 
     print(stats)
     return jsonify(stats), 200
@@ -135,18 +145,62 @@ def get_stats():
 
 
 #Add a third endpoint to allow users to query the data (e.g., filter by a specific column value).
-@app.route('/query', methods=['GET'])
+@app.route('/query', methods=['POST'])
 @authentication
-def query_data():
-    column = request.args.get("column")
-    value = request.args.get("value")
-    if not column or not value:
-        return jsonify({"message": "Provide both 'column' and 'value' as query parameters"}), 400
 
-    filtered = [row for row in data_storage if row.get(column) == value]
+def query_data():
+    if request.content_type != 'application/json':
+        return jsonify({"error": "Unsupported Media Type. Content-Type must be application/json"}), 415
+
+    if not request.json or 'text' not in request.json:
+        return jsonify({"error": "No text provided"}), 400
     
-    print(filtered)
-    return jsonify(filtered), 200
+    text = request.json['text']
+    if text == '':
+        return jsonify({"error": "No text provided"}), 400
+
+    # Call the Deepseek API to generate a response based on the user query
+    response = requests.post(
+        url="https://openrouter.ai/api/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        data=json.dumps({
+            "model": "deepseek/deepseek-r1:free",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": f"As an expert in data analysis, I have the data {data_storage}. Analyze the data and give a response based on the user query: {text}"
+                }
+            ],
+        })
+    )
+
+    if response.status_code != 200:
+        return jsonify({"error": "Failed to get response from Deepseek API"}), 500
+
+    result = response.json().get("choices", [{}])[0].get("message", {}).get("content", "No response")
+    print(result)
+    return jsonify(result), 200
+        
+
+
+
+
+
+
+
+# def query_data():
+#     column = request.args.get("column")
+#     value = request.args.get("value")
+#     if not column or not value:
+#         return jsonify({"message": "Provide both 'column' and 'value' as query parameters"}), 400
+
+#     filtered = [row for row in data_storage if row.get(column) == value]
+    
+#     print(filtered)
+#     return jsonify(filtered), 200
     
 
 
